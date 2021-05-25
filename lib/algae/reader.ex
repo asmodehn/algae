@@ -16,15 +16,14 @@ defmodule Algae.Reader do
       ...>   monad %Algae.Reader{} do
       ...>     count    <- ask &Map.get(&1, :count)
       ...>     bindings <- ask()
-      ...>     return (count == Map.size(bindings))
+      ...>     return (count == Kernel.map_size(bindings))
       ...>   end
       ...>
       ...> sample_bindings = %{count: 3, a: 1, b: 2}
       ...> correct_count   = run(correct, sample_bindings)
       ...> "Correct count for #{inspect sample_bindings}? #{correct_count}"
       "Correct count for %{a: 1, b: 2, count: 3}? true"
-      ...>
-      ...> bad_bindings = %{count: 100, a: 1, b: 2}
+      iex> bad_bindings = %{count: 100, a: 1, b: 2}
       ...> bad_count    = run(correct, bad_bindings)
       ...> "Correct count for #{inspect bad_bindings}? #{bad_count}"
       "Correct count for %{a: 1, b: 2, count: 100}? false"
@@ -127,7 +126,7 @@ defmodule Algae.Reader do
   @spec ask((any() -> any())) :: t()
   def ask(fun) do
     monad %Reader{} do
-      e <- ask
+      e <- ask()
       return fun.(e)
     end
   end
@@ -150,7 +149,7 @@ defmodule Algae.Reader do
   @spec local(t(), (any() -> any())) :: any()
   def local(reader, fun) do
     monad %Reader{} do
-      e <- ask
+      e <- ask()
       return run(reader, fun.(e))
     end
   end
